@@ -44,7 +44,7 @@ data EvenP a b = EvenP {
                     covar :: b
                        }
 
-newtype BoolC a = BoolC {getBool :: a -> Bool} 
+newtype BoolC a = BoolC {runBool :: a -> Bool} 
 
 instance Contravariant BoolC where
     contramap f (BoolC g) = BoolC (g . f)
@@ -56,7 +56,7 @@ instance Profunctor EvenP where
 evenProf :: (Integral a) => a -> Bool
 evenProf n = let m = EvenP (BoolC not) 0
                  dmp = dimap not succ 
-              in (getBool . contr $ (head . dropWhile ((< n) . covar) . iterate dmp) m) False
+              in (runBool . contr $ (head . dropWhile ((< n) . covar) . iterate dmp) m) False
 -- build up a huge stack of nots from the contravariant argument of EvenP, finally applying it to False
 {-# INLINE evenProf #-}
 
@@ -79,13 +79,24 @@ evenPeano = let go b Z = b
                 go b (S a)  = go (not b) a
              in go True . toEnum . fromIntegral
 
+newtype Church a b = Church { runChurch :: a -> b }
+
+toChurch :: (a -> a) -> Peano -> Church a a
+toChurch f p = Church $ go f p
+    where go f Z = id
+          go f (S a) = f . (go f a)
+
+evenChurch :: (Integral a) => a -> Bool
+evenChurch = flip (runChurch . toChurch not . toEnum . fromIntegral ) True
+-- evenChurch and evenPeano are pretty much equivalent
+
 evenBits :: (Integral a) => a -> Bool
 evenBits = toEnum . xor 1 . (.&. 1) . fromIntegral
 
 -- | Returns True if the number is even.
 isEven :: (Integral a) => a -> Bool
 isEven n = let a = abs n
-               f = case (a `mod` 8) of
+               f = case (a `rem` 9) of
                      0 -> evenBits
                      1 -> evenPeano
                      2 -> evenProf
@@ -93,6 +104,7 @@ isEven n = let a = abs n
                      4 -> evenRec
                      5 -> evenFold
                      6 -> evenState
+                     7 -> evenChurch
                      _ -> evenIt
             in f a
                  
