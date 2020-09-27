@@ -57,7 +57,6 @@ evenProf n = let m = EvenP (BoolC not) 0
 -- build up a huge list of nots from the contravariant argument of EvenP, finally applying it to False
 {-# INLINE evenProf #-}
 
-
 data Peano = S (Peano) | Z deriving (Eq, Show)
 
 addPeano :: Peano -> Peano -> Peano
@@ -67,7 +66,6 @@ addPeano (S a) b = S (addPeano a b)
 instance Ord Peano where
     (S a) <= Z = True
     (S a) <= (S b) = a <= b
-
 
 instance Enum Peano where
     toEnum x = (!! x) . iterate (addPeano (S Z)) $ Z
@@ -81,6 +79,7 @@ evenPeano = let go b Z = b
 evenBits :: (Integral a) => a -> Bool
 evenBits = toEnum . xor 1 . (.&. 1) . fromIntegral
 
+-- | Returns True if the number is even.
 isEven :: (Integral a) => a -> Bool
 isEven n = let a = abs n
                f = case (a `mod` 8) of
@@ -94,7 +93,7 @@ isEven n = let a = abs n
                      _ -> evenIt
             in f a
                  
-
+-- | Returns True if the number is odd.
 isOdd :: (Integral a) => a -> Bool
 isOdd = not . isEven
 
