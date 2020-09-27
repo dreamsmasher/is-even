@@ -4,6 +4,7 @@ module Data.Numbers.IsEven
     ) where
 
 import Control.Monad.Trans.State.Lazy
+import Control.Monad
 import Data.Profunctor
 import Data.Functor.Contravariant
 import Data.List (foldl')
@@ -19,15 +20,16 @@ evenFold :: (Integral a) => a -> Bool
 evenFold = foldl' (const . not) False . enumFromTo 0
 {-# INLINE evenFold #-}
 
-_evenState :: Integral a => State a Bool
+_evenState :: (Integral a) => State a Bool
 _evenState = do
     n <- get
     put (n - 1)
     return (toEnum ((fromIntegral n) `mod` 2))
 {-# INLINE _evenState #-}
 
+-- big thanks to ski on #haskell
 evenState :: (Integral a) => a -> Bool
-evenState n = not . head $ evalState (sequence $ replicate (fromIntegral n) _evenState) n
+evenState n = not . head . evalState (replicateM (fromIntegral n) _evenState) $ n
 {-# INLINE evenState #-}
 
 evenIt :: (Integral a) => a -> Bool
@@ -56,7 +58,7 @@ instance Profunctor EvenP where
 evenProf :: (Integral a) => a -> Bool
 evenProf n = let m = EvenP (BoolC not) 0
                  dmp = dimap not succ 
-              in (runBool . contr $ (head . dropWhile ((< n) . covar) . iterate dmp) m) False
+              in (runBool . contr . head . dropWhile ((< n) . covar) . iterate dmp) m False
 -- build up a huge stack of nots from the contravariant argument of EvenP, finally applying it to False
 {-# INLINE evenProf #-}
 
@@ -67,8 +69,8 @@ addPeano Z s = s
 addPeano (S a) b = S (addPeano a b)
 
 instance Ord Peano where
-    Z     <= (S _) = True
-    (S a) <= (S b) = a <= b
+    Z     <= S _ = True
+    S a <= S b = a <= b
 
 instance Enum Peano where
     toEnum x = (!! x) . iterate (addPeano (S Z)) $ Z
