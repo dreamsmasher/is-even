@@ -39,7 +39,10 @@ evenNaive = even
 -- TODO: refactor this complete mess of a function
 {-# INLINE evenNaive #-}
 
-data EvenP a b = EvenP (BoolC a) b  
+data EvenP a b = EvenP {
+                    contr :: BoolC a,
+                    covar :: b
+                       }
 
 newtype BoolC a = BoolC {getBool :: a -> Bool} 
 
@@ -53,7 +56,7 @@ instance Profunctor EvenP where
 evenProf :: (Integral a) => a -> Bool
 evenProf n = let m = EvenP (BoolC not) 0
                  dmp = dimap not succ 
-              in ((\(EvenP b _) -> getBool b) (head . dropWhile (\(EvenP _ z) -> z < n) . iterate dmp $ m)) $ False
+              in (getBool . contr $ (head . dropWhile ((< n) . covar) . iterate dmp) m) False
 -- build up a huge stack of nots from the contravariant argument of EvenP, finally applying it to False
 {-# INLINE evenProf #-}
 
