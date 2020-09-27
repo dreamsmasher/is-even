@@ -62,7 +62,7 @@ evenProf n = let m = EvenP (BoolC not) 0
 -- build up a huge stack of nots from the contravariant argument of EvenP, finally applying it to False
 {-# INLINE evenProf #-}
 
-data Peano = S (Peano) | Z deriving (Eq, Show)
+data Peano = S Peano | Z deriving (Eq, Show)
 
 addPeano :: Peano -> Peano -> Peano
 addPeano Z s = s
