@@ -54,7 +54,7 @@ evenProf :: (Integral a) => a -> Bool
 evenProf n = let m = EvenP (BoolC not) 0
                  dmp = dimap not succ 
               in ((\(EvenP b _) -> getBool b) (head . dropWhile (\(EvenP _ z) -> z < n) . iterate dmp $ m)) $ False
--- build up a huge list of nots from the contravariant argument of EvenP, finally applying it to False
+-- build up a huge stack of nots from the contravariant argument of EvenP, finally applying it to False
 {-# INLINE evenProf #-}
 
 data Peano = S (Peano) | Z deriving (Eq, Show)
@@ -64,7 +64,7 @@ addPeano Z s = s
 addPeano (S a) b = S (addPeano a b)
 
 instance Ord Peano where
-    (S _) <= Z = True
+    Z     <= (S _) = True
     (S a) <= (S b) = a <= b
 
 instance Enum Peano where
