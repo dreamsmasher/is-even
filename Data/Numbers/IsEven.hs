@@ -53,7 +53,7 @@ instance Profunctor EvenP where
 evenProf :: (Integral a) => a -> Bool
 evenProf n = let m = EvenP (BoolC not) 0
                  dmp = dimap not succ 
-              in ((\(EvenP b _) -> getBool b) (head . dropWhile (\(EvenP b z) -> z < n) . iterate dmp $ m)) $ False
+              in ((\(EvenP b _) -> getBool b) (head . dropWhile (\(EvenP _ z) -> z < n) . iterate dmp $ m)) $ False
 -- build up a huge list of nots from the contravariant argument of EvenP, finally applying it to False
 {-# INLINE evenProf #-}
 
@@ -64,7 +64,7 @@ addPeano Z s = s
 addPeano (S a) b = S (addPeano a b)
 
 instance Ord Peano where
-    (S a) <= Z = True
+    (S _) <= Z = True
     (S a) <= (S b) = a <= b
 
 instance Enum Peano where
