@@ -82,13 +82,13 @@ evenPeano = let go b Z = b
 newtype Church a b = Church { runChurch :: a -> b }
 
 toChurch :: (a -> a) -> Peano -> Church a a
-toChurch f p = Church $ go f p
-    where go f Z = id
-          go f (S a) = f . (go f a)
+toChurch = (Church .) . go
+    where go _ Z = id
+          go h (S a) = h . (go h a)
 
 evenChurch :: (Integral a) => a -> Bool
 evenChurch = flip (runChurch . toChurch not . toEnum . fromIntegral ) True
--- evenChurch and evenPeano are pretty much equivalent
+-- toChurch is just a more generalized version of evenPeano where any function can be applied
 
 evenBits :: (Integral a) => a -> Bool
 evenBits = toEnum . xor 1 . (.&. 1) . fromIntegral
