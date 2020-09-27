@@ -8,7 +8,7 @@ cabal-version: 1.12
 
 name:           is-even
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/is-even#readme>
+description:    Returns true if numbers are even/odd.
 homepage:       https://github.com/dreamsmasher/is-even
 bug-reports:    https://github.com/dreamsmasher/is-even/issues
 author:         Naomi Liu
@@ -27,9 +27,7 @@ source-repository head
 
 library
   exposed-modules:
-      IsEven
-  other-modules:
-      Paths_is_even
+      Data.Numbers.IsEven
   hs-source-dirs:
       src
   build-depends:
@@ -39,18 +37,8 @@ library
     , transformers >= 0.5.6.1 && < 0.5.7
     , contravariant >= 1.5.2
   default-language: Haskell2010
-
---executable is-even-exe
-  --main-is: Main.hs
-  --other-modules:
-      --Paths_is_even
-  --hs-source-dirs:
-      --app
-  --ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  --build-depends:
-      --base >=4.7 && <5
-    --, is-even
-  --default-language: Haskell2010
+  ghc-options: -Wall -fnto-warn-incomplete-patterns
+    
 
 test-suite is-even-test
   type: exitcode-stdio-1.0

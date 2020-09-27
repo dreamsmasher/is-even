@@ -1,4 +1,4 @@
-module IsEven
+module Data.Numbers.IsEven
     ( isEven, 
       isOdd 
     ) where
