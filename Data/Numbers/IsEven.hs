@@ -1,10 +1,12 @@
-module Data.Numbers.IsEven
+{-# LANGUAGE FunctionalDependencies, MultiParamTypeClasses #-}
+module Data.Numbers.IsEven 
     ( isEven, 
       isOdd 
     ) where
 
 import Control.Monad.Trans.State.Lazy
 import Control.Monad
+import System.Random
 import Data.Profunctor
 import Data.Functor.Contravariant
 import Data.List (foldl')
@@ -20,16 +22,9 @@ evenFold :: (Integral a) => a -> Bool
 evenFold = foldl' (const . not) False . enumFromTo 0
 {-# INLINE evenFold #-}
 
-_evenState :: (Integral a) => State a Bool
-_evenState = do
-    n <- get
-    put (n - 1)
-    return (toEnum ((fromIntegral n) `mod` 2))
-{-# INLINE _evenState #-}
-
--- big thanks to ski on #haskell
 evenState :: (Integral a) => a -> Bool
-evenState n = not . head . evalState (replicateM (fromIntegral n) _evenState) $ n
+evenState n = execState (replicateM (fromIntegral n) flipper) $ True
+    where flipper = state $ \b -> ((), not b)
 {-# INLINE evenState #-}
 
 evenIt :: (Integral a) => a -> Bool
@@ -40,6 +35,11 @@ evenNaive :: (Integral a) => a -> Bool
 evenNaive = even
 -- TODO: refactor this complete mess of a function
 {-# INLINE evenNaive #-}
+
+evenLazy :: (Integral a) => a -> Bool
+evenLazy = last . zipWith const z . enumFromTo 0
+    where z = True : False : z
+{-# INLINE evenLazy #-}
 
 data EvenP a b = EvenP {
                     contr :: BoolC a,
@@ -73,7 +73,7 @@ instance Ord Peano where
     S a <= S b = a <= b
 
 instance Enum Peano where
-    toEnum x = (!! x) . iterate (addPeano (S Z)) $ Z
+    toEnum = (iterate (addPeano (S Z)) Z !!)
     fromEnum = length . takeWhile (/= Z) . iterate (\(S a) -> a)
 
 evenPeano :: (Integral a) => a -> Bool
@@ -91,14 +91,38 @@ toChurch = (Church .) . go
 evenChurch :: (Integral a) => a -> Bool
 evenChurch = flip (runChurch . toChurch not . toEnum . fromIntegral ) True
 -- toChurch is just a more generalized version of evenPeano where any function can be applied
+{-# INLINE evenChurch #-}
 
 evenBits :: (Integral a) => a -> Bool
 evenBits = toEnum . xor 1 . (.&. 1) . fromIntegral
+{-# INLINE evenBits #-}
+
+class Nand a b c | a b -> c where
+    (|@.) :: a -> b -> c
+
+instance Nand Bool Bool Bool where
+    True |@. True = False
+    _    |@. _    = True
+
+infixr 8 |@.
+
+class Xor a b c | a b -> c where
+    (||>) :: a -> b -> c
+
+instance Xor Bool Bool Bool where
+    a ||> b = (a |@. ab) |@. (b |@. ab)
+        where ab = a |@. b
+              
+
+evenGates :: (Integral a) => a -> Bool
+evenGates = foldr (||>) True . flip replicate True . fromIntegral
+{-# INLINE evenGates #-}
 
 -- | Returns True if the number is even.
 isEven :: (Integral a) => a -> Bool
-isEven n = let a = abs n
-               f = case (a `rem` 9) of
+isEven n = let a = (abs . fromIntegral) n
+               g = mkStdGen a
+               f = case ((!! a) . randomRs (0 :: Int, 11)) g of
                      0 -> evenBits
                      1 -> evenPeano
                      2 -> evenProf
@@ -107,10 +131,14 @@ isEven n = let a = abs n
                      5 -> evenFold
                      6 -> evenState
                      7 -> evenChurch
+                     8 -> evenLazy
+                     9 -> evenGates
                      _ -> evenIt
             in f a
-                 
+{-# INLINE isEven #-}
+
 -- | Returns True if the number is odd.
 isOdd :: (Integral a) => a -> Bool
 isOdd = not . isEven
+{-# INLINE isOdd #-}
 
