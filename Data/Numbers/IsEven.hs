@@ -46,10 +46,12 @@ data EvenP a b = EvenP {
                     covar :: b
                        }
 
-newtype BoolC a = BoolC {runBool :: a -> Bool} 
+newtype BoolC a = BoolC {
+                    runBool :: a -> Bool
+                        } 
 
 instance Contravariant BoolC where
-    contramap f (BoolC g) = BoolC (g . f)
+    contramap f = BoolC . (. f) . runBool
 
 instance Profunctor EvenP where
     dimap f g (EvenP a b) = EvenP (contramap f a) (g b)
@@ -69,7 +71,7 @@ addPeano Z s = s
 addPeano (S a) b = S (addPeano a b)
 
 instance Ord Peano where
-    Z     <= S _ = True
+    Z   <= S _ = True
     S a <= S b = a <= b
 
 instance Enum Peano where
