@@ -21,6 +21,9 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- transformers
+- profunctors
+- random
 
 library:
   source-dirs: src
@@ -37,3 +40,5 @@ tests:
     - -threaded
     dependencies:
     - is-even
+    - QuickCheck
+    - hspec
