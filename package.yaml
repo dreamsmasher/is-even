@@ -24,6 +24,7 @@ dependencies:
 - transformers
 - profunctors
 - random
+- regex
 
 library:
   source-dirs: src
