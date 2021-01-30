@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d40b2b10f3e4c28b4a44ad1d384aa2d3cd64f07e7be38f443bc6e9bd4b5d1831
+-- hash: fa7b57c28d8c573bd348d9dde96b137c3856481ade9802e22be9740b3ddfce98
 
 name:           is-even
 version:        0.1.0.0
@@ -37,6 +37,7 @@ library
       base >=4.7 && <5
     , profunctors
     , random
+    , regex
     , transformers
   default-language: Haskell2010
 
@@ -55,5 +56,6 @@ test-suite is-even-test
     , is-even
     , profunctors
     , random
+    , regex
     , transformers
   default-language: Haskell2010

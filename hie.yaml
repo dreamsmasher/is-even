@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "is-even:lib"
+
+    - path: "./test"
+      component: "is-even:test:is-even-test"

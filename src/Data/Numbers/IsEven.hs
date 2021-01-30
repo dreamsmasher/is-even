@@ -1,17 +1,17 @@
-{-# LANGUAGE FunctionalDependencies, MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies, MultiParamTypeClasses, QuasiQuotes, TypeApplications #-}
 module Data.Numbers.IsEven 
-    ( isEven, 
-      isOdd,
-      evenFixed
+    ( isEven
+    , isOdd
     ) where
 
-import Control.Monad.Trans.State.Lazy
-import Control.Monad
-import System.Random
-import Data.Profunctor
-import Data.Functor.Contravariant
+import Control.Monad.Trans.State.Lazy ( execState, state )
+import Control.Monad ( replicateM )
+import System.Random ( mkStdGen, Random(randomRs) )
+import Data.Profunctor ( Profunctor(dimap) )
+import Data.Functor.Contravariant ( Contravariant(contramap) )
 import Data.List (foldl')
-import Data.Bits
+import Data.Bits ( Bits((.&.), xor) )
+import Text.RE.TDFA.String ( matched, re, (?=~) )
 
 evenRec :: (Integral a) => a -> Bool
 evenRec n = go n True
@@ -132,11 +132,15 @@ evenGates :: (Integral a) => a -> Bool
 evenGates = foldr (||>) True . flip replicate True . fromIntegral
 {-# INLINE evenGates #-}
 
+evenRegex :: (Integral a) => a -> Bool
+evenRegex = matched . (?=~ [re|\d*[02468]$|]) . show @Integer . fromIntegral 
+{-# INLINE evenRegex #-}
+
 -- | Returns True if the number is even.
 isEven :: (Integral a) => a -> Bool
 isEven n = let a = (abs . fromIntegral) n
                g = mkStdGen a
-               f = case ((!! a) . randomRs (0 :: Int, 11)) g of
+               f = case ((!! a) . randomRs (0 :: Int, 12)) g of
                      0  -> evenBits
                      1  -> evenPeano
                      2  -> evenProf
@@ -148,6 +152,7 @@ isEven n = let a = (abs . fromIntegral) n
                      8  -> evenLazy
                      9  -> evenGates
                      10 -> evenFixed
+                     11 -> evenRegex
                      _  -> evenIt
             in f a
 {-# INLINE isEven #-}
@@ -156,4 +161,3 @@ isEven n = let a = (abs . fromIntegral) n
 isOdd :: (Integral a) => a -> Bool
 isOdd = not . isEven
 {-# INLINE isOdd #-}
-
