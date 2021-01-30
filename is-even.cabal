@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ff0f926eeb38e7a7680394327db89110d4b21832f5de1a3a45dd2f694c671a98
+-- hash: 268ffdd529182f2452c400a5428cfd04022bca391e4a682d877f1bb33fbaae27
 
 name:           is-even
 version:        0.1.0.0
-description:    Returns true if numbers are even/odd.
-homepage:       https://github.com/dreamsmasher/is-even
-bug-reports:    https://github.com/dreamsmasher/is-even/issues
-author:         Naomi Liu
-maintainer:     dreamsmasher@protonmail.com
-copyright:      2020 Naomi Liu
+description:    Please see the README on GitHub at <https://github.com/githubuser/is-even#readme>
+homepage:       https://github.com/githubuser/is-even#readme
+bug-reports:    https://github.com/githubuser/is-even/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,21 +23,17 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/dreamsmasher/is-even
+  location: https://github.com/githubuser/is-even
 
 library
-  exposed-modules:
-      Data.Numbers.IsEven
+  other-modules:
+      Paths_is_even
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -O2 -threaded
   build-depends:
       base >=4.7 && <5
-    , containers >= 0.6.2 && < 0.6.5
-    , profunctors >= 5.5 && < 5.6
-    , transformers >= 0.5.6.1 && < 0.5.7
-    , contravariant >= 1.5.2
-    , random >= 1.0.9 && < 1.1.2
   default-language: Haskell2010
-  ghc-options: -Wall -fno-warn-incomplete-patterns -O2
-    
 
 test-suite is-even-test
   type: exitcode-stdio-1.0
@@ -46,11 +42,8 @@ test-suite is-even-test
       Paths_is_even
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -O2
+  ghc-options: -threaded
   build-depends:
       base >=4.7 && <5
-    , QuickCheck >= 2.13
     , is-even
-    , hspec >= 2.7.0
-    
   default-language: Haskell2010

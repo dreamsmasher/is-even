@@ -24,17 +24,10 @@ dependencies:
 
 library:
   source-dirs: src
-
-executables:
-  is-even-exe:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
+  ghc-options: 
+    - -Wall
+    - -O2
     - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - is-even
 
 tests:
   is-even-test:
@@ -42,7 +35,5 @@ tests:
     source-dirs:         test
     ghc-options:
     - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
     dependencies:
     - is-even
