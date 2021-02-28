@@ -1,29 +1,39 @@
+{-# LANGUAGE TypeApplications #-}
 import Test.QuickCheck
 import Test.Hspec
 import Test.Hspec.Runner
 import Test.Hspec.QuickCheck
 import Data.Numbers.IsEven
+import Data.Word (Word)
 
-propEven :: [Int] -> Bool
-propEven xs = map isEven xs == map even xs
+propEven :: Integral a => a -> Bool
+propEven x = isEven x == even x
 
+propOdd :: Integral a => a -> Bool
+propOdd x = isOdd x == odd x
 
-propOdd :: [Int] -> Bool
-propOdd xs = map isOdd xs == map odd xs
+specEven :: Spec
+specEven = describe "isEven" $ do
+    it "works for Ints" $ property (propEven @Int)
+    it "works for Integers" $ property (propEven @Integer)
+    it "works for Words" $ property (propEven @Word)
 
+specOdd :: Spec
+specOdd = describe "isOdd" $ do
+    it "works for Ints" $ property (propOdd @Int)
+    it "works for Integers" $ property (propOdd @Integer)
+    it "works for Words" $ property (propOdd @Word)
 
 spec :: Spec
-spec = do
-    modifyMaxSuccess (const 1000) $ it "checks if a number is even" $ property propEven
-    modifyMaxSuccess (const 1000) $ it "checks if a number is odd" $ property propOdd
+spec = mapM_ (modifyMaxSuccess $ const 5000) [specEven, specOdd]
 
 config :: Config
-config = defaultConfig {
-        configPrintCpuTime = True,
-        configRandomize = True,
-        configColorMode = ColorAuto
+config = defaultConfig 
+    { configPrintCpuTime = True
+    , configRandomize = True
+    , configColorMode = ColorAuto
+    }
 
-                       }
 main :: IO ()
 main = readConfig config [] >>= runSpec spec >>= evaluateSummary
 
