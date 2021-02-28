@@ -30,8 +30,6 @@ library:
   source-dirs: src
   ghc-options: 
     - -Wall
-    - -O2
-    - -threaded
 
 tests:
   is-even-test:
@@ -39,6 +37,8 @@ tests:
     source-dirs:         test
     ghc-options:
     - -threaded
+    - -O2
+    - -with-rtsopts= -N
     dependencies:
     - is-even
     - QuickCheck
