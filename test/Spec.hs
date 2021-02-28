@@ -1,31 +1,73 @@
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ExistentialQuantification, TypeApplications #-}
 import Test.QuickCheck
 import Test.Hspec
 import Test.Hspec.Runner
 import Test.Hspec.QuickCheck
-import Data.Numbers.IsEven
-import Data.Word (Word)
+import System.Random
 
-propEven :: Integral a => a -> Bool
-propEven x = isEven x == even x
+import Data.Numbers.IsEven
+import Data.Numbers.IsEvenCore
+
+propEven :: forall a. (Integral a, Arbitrary a) => (a -> Bool) -> a -> Bool
+propEven f x = f x == even x
 
 propOdd :: Integral a => a -> Bool
 propOdd x = isOdd x == odd x
 
-specEven :: Spec
-specEven = describe "isEven" $ do
-    it "works for Ints" $ property (propEven @Int)
-    it "works for Integers" $ property (propEven @Integer)
-    it "works for Words" $ property (propEven @Word)
+specEvenFuncs ::  String -> (Int -> Bool) -> Spec
+specEvenFuncs s f = parallel $ describe s $ do
+    it "checks if a number is even" 
+      $ property (forAll (chooseInt (0, 1000000)) $ propEven f)
 
-specOdd :: Spec
-specOdd = describe "isOdd" $ do
-    it "works for Ints" $ property (propOdd @Int)
-    it "works for Integers" $ property (propOdd @Integer)
-    it "works for Words" $ property (propOdd @Word)
+specIsEven, specOdd :: Spec
+specIsEven = parallel $ describe "isEven" $ do
+    it "checks if a number is even" $ property (propEven (isEven @Integer))
+
+specOdd = parallel $ describe "isOdd" $ do
+    it "checks if a number is odd" $ property (propOdd @Integer)
+
+funcs :: (Integral a, Arbitrary a, Show a) => [a -> Bool]
+funcs = [ evenBits
+        , evenPeano
+        , evenProf
+        , evenNaive
+        , evenRec
+        , evenFold
+        , evenState
+        , evenChurch
+        , evenLazy
+        , evenGates
+        , evenFixed
+        , evenRegex
+        , evenIt
+        , evenMonoid
+        , evenSemigroup
+        , evenGraph
+        ]
+
+names :: [String]
+names = [ "evenBits"
+        , "evenPeano"
+        , "evenProf"
+        , "evenNaive"
+        , "evenRec"
+        , "evenFold"
+        , "evenState"
+        , "evenChurch"
+        , "evenLazy"
+        , "evenGates"
+        , "evenFixed"
+        , "evenRegex"
+        , "evenIt"
+        , "evenMonoid"
+        , "evenSemigroup"
+        , "evenGraph"
+        ]
 
 spec :: Spec
-spec = mapM_ (modifyMaxSuccess $ const 5000) [specEven, specOdd]
+spec = parallel $ do
+    mapM_ (modifyMaxSuccess $ const 1000) $ 
+        zipWith specEvenFuncs names funcs <> [specIsEven, specOdd]
 
 config :: Config
 config = defaultConfig 
